@@ -1,0 +1,57 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: fastapi-metrics-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: fastapi-metrics-app
+  template:
+    metadata:
+      labels:
+        app: fastapi-metrics-app
+    spec:
+      containers:
+        - name: fastapi-metrics-app
+          image: fastapi-metrics-app:latest
+          imagePullPolicy: Never
+          resources:
+            requests:
+              memory: "32Mi"
+              cpu: "100m"
+            limits:
+              memory: "64Mi"
+              cpu: "200m"
+          ports:
+            - containerPort: 5000
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: fastapi-metrics-app
+spec:
+  selector:
+    app: fastapi-metrics-app
+  ports:
+    - protocol: TCP
+      port: 5000
+      targetPort: 5000
+      nodePort: 30007
+  type: NodePort
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: prometheus
+spec:
+  selector:
+    app: prometheus
+  ports:
+    - protocol: TCP
+      port: 9090
+      targetPort: 9090
+      nodePort: 30008
+  type: NodePort
